@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { API_KEYS } from "./api-keys";
 
 export const MissingSkillSchema = z.object({
   skill: z.string(),
@@ -38,8 +39,8 @@ const InputSchema = z.object({
 });
 
 export const analyzeResume = async (data: z.infer<typeof InputSchema>) => {
-    const geminiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
-    const groqKey = import.meta.env.VITE_GROQ_API_KEY || "";
+    const geminiKey = API_KEYS.GEMINI;
+    const groqKey = API_KEYS.GROQ;
     
     const sys = `You are a Senior Technical Recruiter and ATS expert. Analyze the resume STRICTLY. Return ONLY raw JSON.`;
     const user = `RESUME:\n${data.resumeText}\n\nJD: ${data.jobDescription || "N/A"}`;

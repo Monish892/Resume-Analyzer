@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { API_KEYS } from "./api-keys";
 
 const BaseInputSchema = z.object({
   resumeText: z.string(),
@@ -6,8 +7,8 @@ const BaseInputSchema = z.object({
 });
 
 async function callAI(prompt: string, systemPrompt: string = "You are a helpful career assistant.") {
-  const geminiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
-  const groqKey = import.meta.env.VITE_GROQ_API_KEY || "";
+  const geminiKey = API_KEYS.GEMINI;
+  const groqKey = API_KEYS.GROQ;
 
   // PROVIDER 1: Groq
   if (groqKey) {

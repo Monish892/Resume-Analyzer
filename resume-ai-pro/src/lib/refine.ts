@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { API_KEYS } from "./api-keys";
 
 const InputSchema = z.object({
   resumeText: z.string(),
@@ -7,7 +8,7 @@ const InputSchema = z.object({
 });
 
 export const refineResume = async (data: z.infer<typeof InputSchema>) => {
-    const geminiKey = import.meta.env.VITE_GEMINI_API_KEY || "";
+    const geminiKey = API_KEYS.GEMINI;
     
     const sys = `You are an expert career coach. Generate a high-quality ${data.type}.`;
     const user = `RESUME:\n${data.resumeText}\n\nJD: ${data.jobDescription || "N/A"}`;
