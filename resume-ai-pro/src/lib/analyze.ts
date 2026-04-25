@@ -42,7 +42,13 @@ export const analyzeResume = async (data: z.infer<typeof InputSchema>) => {
     const geminiKey = API_KEYS.GEMINI;
     const groqKey = API_KEYS.GROQ;
     
+    const hasJD = Boolean(data.jobDescription && data.jobDescription.trim().length > 0);
+    
     const sys = `You are a Senior Technical Recruiter and ATS expert. Analyze the resume STRICTLY. 
+${!hasJD 
+  ? "NO Job Description was provided. Analyze the resume GENERALLY for industry best practices. Do NOT compare it to any specific job. Provide detailed, 2-3 sentence explanations for each strength, weakness, and improvement." 
+  : "A Job Description (JD) was provided. Compare the resume against the JD ACCURATELY and STRICTLY. Highlight exact gaps and matches. Provide detailed, 2-3 sentence explanations for each strength, weakness, and improvement."}
+
 Return ONLY raw JSON with the following exact structure:
 {
   "atsScore": 0-100,
@@ -52,9 +58,9 @@ Return ONLY raw JSON with the following exact structure:
   "improvements": ["string"],
   "missingSkills": [{"skill": "string", "impact": 1-100, "reason": "string"}],
   "suggestedProjects": [{"title": "string", "description": "string", "difficulty": "Beginner | Intermediate | Advanced", "skillsAddressed": ["string"]}],
-  "jobMatchScore": 0-100
+  "jobMatchScore": ${hasJD ? "0-100" : "null"}
 }`;
-    const user = `RESUME:\n${data.resumeText}\n\nJD: ${data.jobDescription || "N/A"}`;
+    const user = `RESUME:\n${data.resumeText}${hasJD ? `\n\nJD: ${data.jobDescription}` : ""}`;
 
     if (groqKey) {
       try {
