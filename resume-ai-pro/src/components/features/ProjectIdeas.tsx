@@ -13,7 +13,7 @@ export function ProjectIdeas({ analysis, resumeText, jobDescription }: { analysi
   const onGenerate = async () => {
     setLoading(true);
     try {
-      const result = await generateProjectIdeas({ data: { resumeText, jobDescription } });
+      const result = await generateProjectIdeas({ resumeText, jobDescription });
       if (result.ok) {
         setData(result.data);
         toast.success("Project ideas ready!");

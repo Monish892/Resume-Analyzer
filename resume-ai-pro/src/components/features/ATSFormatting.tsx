@@ -13,7 +13,7 @@ export function ATSFormatting({ resumeText, jobDescription }: { resumeText: stri
   const onCheck = async () => {
     setLoading(true);
     try {
-      const result = await checkATSFlags({ data: { resumeText, jobDescription } });
+      const result = await checkATSFlags({ resumeText, jobDescription: "" });
       if (result.ok) {
         setData(result.data);
         toast.success("ATS check complete!");

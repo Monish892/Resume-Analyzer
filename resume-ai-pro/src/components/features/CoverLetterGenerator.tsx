@@ -12,7 +12,7 @@ export function CoverLetterGenerator({ resumeText, jobDescription }: { resumeTex
   const onGenerate = async () => {
     setLoading(true);
     try {
-      const result = await generateCoverLetter({ data: { resumeText, jobDescription } });
+      const result = await generateCoverLetter({ resumeText, jobDescription });
       if (result.ok) {
         setLetter(result.letter);
         toast.success("Cover letter generated!");

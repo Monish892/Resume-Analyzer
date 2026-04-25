@@ -16,7 +16,7 @@ export function BulletPointOptimizer() {
     if (!original) return;
     setLoading(true);
     try {
-      const result = await optimizeBulletPoint({ data: { bullet: original, context: role } });
+      const result = await optimizeBulletPoint({ bullet: original, context: role });
       if (result.ok) {
         setOptimized(result.bullet);
         toast.success("Bullet point optimized!");

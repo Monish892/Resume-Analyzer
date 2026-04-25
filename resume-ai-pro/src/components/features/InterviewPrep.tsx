@@ -13,7 +13,7 @@ export function InterviewPrep({ resumeText, jobDescription }: { resumeText: stri
   const onGenerate = async () => {
     setLoading(true);
     try {
-      const result = await generateInterviewQuestions({ data: { resumeText, jobDescription } });
+      const result = await generateInterviewQuestions({ resumeText, jobDescription });
       if (result.ok) {
         setData(result.data);
         toast.success("Interview prep ready!");

@@ -13,7 +13,7 @@ export function OutreachGenerator({ resumeText, jobDescription }: { resumeText: 
   const onGenerate = async () => {
     setLoading(true);
     try {
-      const result = await generateOutreach({ data: { resumeText, jobDescription } });
+      const result = await generateOutreach({ resumeText, jobDescription });
       if (result.ok) {
         setData(result.data);
         toast.success("Outreach kit generated!");

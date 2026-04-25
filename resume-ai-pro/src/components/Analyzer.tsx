@@ -37,7 +37,7 @@ export function Analyzer() {
         return;
       }
       setStage("analyzing");
-      const result = await analyzeResume({ data: { resumeText: text, jobDescription } });
+      const result = await analyzeResume({ resumeText: text, jobDescription });
       if (!result.ok) {
         toast.error(result.error);
         setStage("idle");

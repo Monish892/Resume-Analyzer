@@ -13,7 +13,7 @@ export function SalaryEstimator({ resumeText, jobDescription }: { resumeText: st
   const onEstimate = async () => {
     setLoading(true);
     try {
-      const result = await estimateSalary({ data: { resumeText, jobDescription } });
+      const result = await estimateSalary({ resumeText, jobDescription });
       if (result.ok) {
         setData(result.data);
         toast.success("Salary estimate ready!");

@@ -17,7 +17,7 @@ export function ResumeRefiner({ resumeText, jobDescription }: { resumeText: stri
   const onRefine = async () => {
     setLoading(true);
     try {
-      const result = await refineResume({ data: { resumeText, jobDescription } });
+      const result = await refineResume({ resumeText, jobDescription, type: "cover-letter" } as any);
       if (result.ok) {
         setData(result.data);
         toast.success("Resume perfected and restructured!");
