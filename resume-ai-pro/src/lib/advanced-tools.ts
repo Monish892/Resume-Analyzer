@@ -25,6 +25,8 @@ async function callAI(prompt: string, systemPrompt: string = "You are a helpful 
       if (res.ok) {
         const json = await res.json();
         return json.choices?.[0]?.message?.content || "";
+      } else {
+        console.error("Groq API error:", await res.text());
       }
     } catch (e) {
       console.error("Groq error:", e);

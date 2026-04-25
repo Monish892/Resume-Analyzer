@@ -42,7 +42,18 @@ export const analyzeResume = async (data: z.infer<typeof InputSchema>) => {
     const geminiKey = API_KEYS.GEMINI;
     const groqKey = API_KEYS.GROQ;
     
-    const sys = `You are a Senior Technical Recruiter and ATS expert. Analyze the resume STRICTLY. Return ONLY raw JSON.`;
+    const sys = `You are a Senior Technical Recruiter and ATS expert. Analyze the resume STRICTLY. 
+Return ONLY raw JSON with the following exact structure:
+{
+  "atsScore": 0-100,
+  "summary": "string",
+  "strengths": ["string"],
+  "weaknesses": ["string"],
+  "improvements": ["string"],
+  "missingSkills": [{"skill": "string", "impact": 1-100, "reason": "string"}],
+  "suggestedProjects": [{"title": "string", "description": "string", "difficulty": "Beginner | Intermediate | Advanced", "skillsAddressed": ["string"]}],
+  "jobMatchScore": 0-100
+}`;
     const user = `RESUME:\n${data.resumeText}\n\nJD: ${data.jobDescription || "N/A"}`;
 
     if (groqKey) {
@@ -52,6 +63,7 @@ export const analyzeResume = async (data: z.infer<typeof InputSchema>) => {
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${groqKey}` },
           body: JSON.stringify({
             model: "llama-3.3-70b-versatile",
+            response_format: { type: "json_object" },
             messages: [{ role: "system", content: sys }, { role: "user", content: user }],
             temperature: 0.1
           })
@@ -61,8 +73,13 @@ export const analyzeResume = async (data: z.infer<typeof InputSchema>) => {
           const text = json.choices?.[0]?.message?.content;
           const parsed = parseAndValidate(text);
           if (parsed) return { ok: true as const, analysis: parsed };
+          console.error("Groq validation failed. Response:", text);
+        } else {
+          console.error("Groq API error:", await res.text());
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error("Groq network error:", e);
+      }
     }
 
     if (geminiKey) {
