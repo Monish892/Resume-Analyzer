@@ -41,6 +41,7 @@ const InputSchema = z.object({
 export const analyzeResume = async (data: z.infer<typeof InputSchema>) => {
     const geminiKey = API_KEYS.GEMINI;
     const groqKey = API_KEYS.GROQ;
+    const openaiKey = API_KEYS.OPENAI;
     
     const hasJD = Boolean(data.jobDescription && data.jobDescription.trim().length > 0);
     
@@ -62,9 +63,10 @@ Return ONLY raw JSON with the following exact structure:
 }`;
     const user = `RESUME:\n${data.resumeText}${hasJD ? `\n\nJD: ${data.jobDescription}` : ""}`;
 
+    // 1. TRY GROQ
     if (groqKey) {
       try {
-        const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+        const res = await fetch("/api/groq/openai/v1/chat/completions", {
           method: "POST",
           headers: { "Content-Type": "application/json", "Authorization": `Bearer ${groqKey}` },
           body: JSON.stringify({
@@ -88,6 +90,7 @@ Return ONLY raw JSON with the following exact structure:
       }
     }
 
+    // 2. TRY GEMINI
     if (geminiKey) {
       try {
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`, {
@@ -100,8 +103,42 @@ Return ONLY raw JSON with the following exact structure:
           const text = json.candidates?.[0]?.content?.parts?.[0]?.text;
           const parsed = parseAndValidate(text);
           if (parsed) return { ok: true as const, analysis: parsed };
+        } else {
+          const errorText = await res.text();
+          console.error("Gemini API error:", errorText);
+          if (res.status === 429) {
+            console.error("Gemini Rate Limit Exceeded. Try again later or use a different key.");
+          }
         }
-      } catch (e) {}
+      } catch (e) {
+        console.error("Gemini network error:", e);
+      }
+    }
+
+    // 3. TRY OPENAI
+    if (openaiKey) {
+      try {
+        const res = await fetch("https://api.openai.com/v1/chat/completions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${openaiKey}` },
+          body: JSON.stringify({
+            model: "gpt-4o-mini",
+            response_format: { type: "json_object" },
+            messages: [{ role: "system", content: sys }, { role: "user", content: user }],
+            temperature: 0.1
+          })
+        });
+        if (res.ok) {
+          const json = await res.json();
+          const text = json.choices?.[0]?.message?.content;
+          const parsed = parseAndValidate(text);
+          if (parsed) return { ok: true as const, analysis: parsed };
+        } else {
+          console.error("OpenAI API error:", await res.text());
+        }
+      } catch (e) {
+        console.error("OpenAI network error:", e);
+      }
     }
 
     return { ok: false as const, error: "AI analysis failed. Please check your API keys." };

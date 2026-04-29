@@ -9,11 +9,12 @@ const BaseInputSchema = z.object({
 async function callAI(prompt: string, systemPrompt: string = "You are a helpful career assistant.") {
   const geminiKey = API_KEYS.GEMINI;
   const groqKey = API_KEYS.GROQ;
+  const openaiKey = API_KEYS.OPENAI;
 
   // PROVIDER 1: Groq
   if (groqKey) {
     try {
-      const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      const res = await fetch("/api/groq/openai/v1/chat/completions", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": `Bearer ${groqKey}` },
         body: JSON.stringify({
@@ -44,9 +45,38 @@ async function callAI(prompt: string, systemPrompt: string = "You are a helpful 
       if (res.ok) {
         const json = await res.json();
         return json.candidates?.[0]?.content?.parts?.[0]?.text || "";
+      } else {
+        const errorText = await res.text();
+        console.error("Gemini API error:", errorText);
+        if (res.status === 429) {
+          console.error("Gemini Rate Limit Exceeded. Try again later or use a different key.");
+        }
       }
     } catch (e) {
       console.error("Gemini error:", e);
+    }
+  }
+
+  // PROVIDER 3: OpenAI
+  if (openaiKey) {
+    try {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${openaiKey}` },
+        body: JSON.stringify({
+          model: "gpt-4o-mini",
+          messages: [{ role: "system", content: systemPrompt }, { role: "user", content: prompt }],
+          temperature: 0.7
+        })
+      });
+      if (res.ok) {
+        const json = await res.json();
+        return json.choices?.[0]?.message?.content || "";
+      } else {
+        console.error("OpenAI API error:", await res.text());
+      }
+    } catch (e) {
+      console.error("OpenAI error:", e);
     }
   }
 

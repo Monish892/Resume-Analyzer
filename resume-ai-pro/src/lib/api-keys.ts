@@ -1,5 +1,6 @@
 // API Keys Configuration
 export const API_KEYS = {
-  GROQ: "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",
-  GEMINI: "AIzaSyAQBVf7LvRH2EQLfuKbeyQExVYTnjJ5KQA",
+  GROQ: import.meta.env.VITE_GROQ_API_KEY || "",
+  GEMINI: import.meta.env.VITE_GEMINI_API_KEY || "",
+  OPENAI: import.meta.env.VITE_OPENAI_API_KEY || "",
 };
